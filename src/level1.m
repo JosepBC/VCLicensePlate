@@ -2,22 +2,61 @@ img1 = imread('../in_img/vivotek/afternoon/WTG38N.png');
 img2 = imread('../in_img/vivotek/afternoon/T67YVU.png');
 img3 = imread('../in_img/vivotek/afternoon/V01KHQ.png');
 
-dst1 = green_filter(img1);
-figure, imshow(dst1);
+dst = process_image(img3);
+[row, col] = find(dst);
+min_row = min(row);
+min_col = min(col);
+
+max_row = max(row);
+max_col = max(col);
+
+
+
+
+rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)))
+dst = imrotate(dst, -45 + rotation_angle);
+figure, imshow(dst);
+hold on;
+plot(min_col, min_row, 'ro', 'MarkerSize', 3);
+plot(max_col, max_row, 'ro', 'MarkerSize', 30);
+%dst = process_image(img2);
+%figure, imshow(dst);
+
+%dst = process_image(img3);
+%figure, imshow(dst);
+
+
+
+function dst = process_image(src)
+    dst = green_filter(src);
+    dst = filter_img(dst);
+    %dst = scale_rotate(dst);
+    
+end
 
 function dst = green_filter(src_img)
-    %min_green = [70, 20, 60];  %this is hsl  
-    %max_green = [160, 200, 255]; %this is hsl
-
-    min_green = [70, 20, 68];
-    max_green = [160, 200, 100]; 
-
     hsv_img = rgb2hsv(src_img);
-    dst = in_range(hsv_img, min_green, max_green);
+    [h,s,v] = imsplit(hsv_img);
+    dst = (s > 0.36) & (0.33 < h & h < 0.51 ) & (0.21 < v & v < 0.59);
+end
+
+function dst = filter_img(src)
+    dst = bwpropfilt(src,'Area',6); 
+end
+
+function dst = scale_rotate(src)
+    [row, col] = find(src);
+    min_row = min(row);
+    min_col = min(col);
+    
+    max_row = max(row);
+    max_col = max(col);
+
+    hold on;
+    plot(min_row, min_col, 'ro', 'MarkerSize', 3);
+    rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)));
+    rotation_angle
+    dst = imrotate(src, 45 - rotation_angle);
 end
 
 
-function dst = in_range(src_img, low_values, high_values)
-    dst = src_img(:,:,1) > low_values(1) & src_img(:,:,2) > low_values(2) & src_img(:,:,3) > low_values(3) & src_img(:,:,1) < high_values(1) & src_img(:,:,2) < high_values(2) & src_img(:,:,3) < high_values(3);
-
-end
