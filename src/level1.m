@@ -1,13 +1,18 @@
-img1 = imread('../in_img/vivotek/afternoon/WTG38N.png');
-img2 = imread('../in_img/vivotek/afternoon/T67YVU.png');
-img3 = imread('../in_img/vivotek/afternoon/V01KHQ.png');
-
-
 teamplates = load_teamplates("../in_img/teamplates/");
 
 in_images = load_in_images("../in_img/vivotek/afternoon/");
 
-dst = process_image(img3);
+
+for key = keys(in_images)
+    figure, imshow(in_images(char(key)));
+
+    plate = char(key);
+
+    dst = process_image(in_images(plate), plate, teamplates)
+
+end
+
+
 
 function in_images = load_in_images(in_images_root_path)
     names = ls(in_images_root_path+"*.png");
@@ -19,7 +24,6 @@ function in_images = load_in_images(in_images_root_path)
         in_images(elem) = imread(in_images_root_path+elem+".png");
     end
 end
-
 
 function teamplates = load_teamplates(teamplates_root_path)
     teamplate_names = ls(teamplates_root_path+"*.png");
@@ -34,14 +38,14 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-
-
-function dst = process_image(src)
+function dst = process_image(src, ground_truth, teamplates)
     bw = green_filter(src);
-    dst = clean_img(bw);
+    cleaned_img = clean_img(bw);
+    imshowpair(src, cleaned_img, 'montage');
     %rotated = scale_rotate(dst);
-    dst = split_plate(dst);
-    
+    plate_parts = split_plate(cleaned_img);
+    dst = check_plate(plate_parts, ground_truth, teamplates);
+    %dst = cleaned_img;
 end
 
 function dst = green_filter(src_img)
@@ -110,34 +114,59 @@ end
 %IN:
 %   - Array of the 6 elements of the plate
 %   - String with the correct answer
+%   - Teamplates
 %OUT:
 %   - Nelem sucesfully classified
-function dst = check_plate(plate_elements, ground_truth)
+function dst = check_plate(plate_elements, ground_truth, teamplates)
+    dst = 0;
+    for n = 1 : height(plate_elements)
+        detected_element = correlate_element(plate_elements{n}, teamplates);
+        if detected_element == ground_truth(n)
+            dst = dst + 1;
+        end
+    end
 
 end
 
 %IN:
 %   - One plate letter/number
+%   - Teamplates
 %OUT:
 %   - Char with the most similar element
-function dst = correlate_element(plate_element)
+function dst = correlate_element(plate_element, teamplates)
+    highest_match = 0;
+    dst = '';
 
-    t = imread('../in_img/teamplates/T.png');
-    [rows, columns, numberOfColorChannels] = size(t);
-    scondt = imresize(dst{1}, [rows, columns]);
-    c = normxcorr2(t,scondt);
+    for key = keys(teamplates)
+        teamplate_name = char(key);
+        teamplate_img = teamplates(teamplate_name);
+
+        %Test image must be same size as teamplate
+        [rows, cols, numberOfColorChannels] = size(teamplate_img);
+        element = imresize(plate_element, [rows, cols]);
+
+        %Get correlations
+        c = normxcorr2(teamplate_img, element);
+        current_max = max(c(:));
+        if current_max > highest_match
+            highest_match = current_max;
+            dst = teamplate_name;
+        end
+    end
+    %t = imread('../in_img/teamplates/T.png');
+    %[rows, columns, numberOfColorChannels] = size(t);
+    %scondt = imresize(dst{1}, [rows, columns]);
+    %c = normxcorr2(t,scondt);
     %surf(c)
     %shading flat
 
-    max(c(:))
-    [ypeak,xpeak] = find(c==max(c(:)));
-    yoffSet = ypeak-size(t,1);
-    xoffSet = xpeak-size(t,2);
-    imshow(scondt)
-    drawrectangle(gca,'Position',[xoffSet,yoffSet,size(t,2),size(t,1)], ...
-        'FaceAlpha',0);
-
-    dst = 'T';
+    %
+    %[ypeak,xpeak] = find(c==max(c(:)));
+    %yoffSet = ypeak-size(t,1);
+    %xoffSet = xpeak-size(t,2);
+    %imshow(scondt)
+    %drawrectangle(gca,'Position',[xoffSet,yoffSet,size(t,2),size(t,1)], ...
+    %    'FaceAlpha',0);
 end
 
 
