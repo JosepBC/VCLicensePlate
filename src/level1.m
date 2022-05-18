@@ -107,4 +107,58 @@ function dst = split_plate(src)
 
 end
 
+%IN:
+%   - Array of the 6 elements of the plate
+%   - String with the correct answer
+%OUT:
+%   - Nelem sucesfully classified
+function dst = check_plate(plate_elements, ground_truth)
+
+end
+
+%IN:
+%   - One plate letter/number
+%OUT:
+%   - Char with the most similar element
+function dst = correlate_element(plate_element)
+
+    t = imread('../in_img/teamplates/T.png');
+    [rows, columns, numberOfColorChannels] = size(t);
+    scondt = imresize(dst{1}, [rows, columns]);
+    c = normxcorr2(t,scondt);
+    %surf(c)
+    %shading flat
+
+    max(c(:))
+    [ypeak,xpeak] = find(c==max(c(:)));
+    yoffSet = ypeak-size(t,1);
+    xoffSet = xpeak-size(t,2);
+    imshow(scondt)
+    drawrectangle(gca,'Position',[xoffSet,yoffSet,size(t,2),size(t,1)], ...
+        'FaceAlpha',0);
+
+    dst = 'T';
+end
+
+
+%IN:
+%   - dst = Processed and splited image
+%   - ground_truth = String with the plate, ex: WAQ123
+function store_teamplates(dst, groun_truth)
+    imwrite(dst{1}, "../in_img/teamplates/new/"+groun_truth(1)+".png");
+    imwrite(dst{2}, "../in_img/teamplates/new/"+groun_truth(2)+".png");
+    imwrite(dst{3}, "../in_img/teamplates/new/"+groun_truth(3)+".png");
+    imwrite(dst{4}, "../in_img/teamplates/new/"+groun_truth(4)+".png");
+    imwrite(dst{5}, "../in_img/teamplates/new/"+groun_truth(5)+".png");
+    imwrite(dst{6}, "../in_img/teamplates/new/"+groun_truth(6)+".png");
+end
+
+function show_parts(dst)
+    figure, imshow(dst{1});
+    figure, imshow(dst{2});
+    figure, imshow(dst{3});
+    figure, imshow(dst{4});
+    figure, imshow(dst{5});
+    figure, imshow(dst{6});
+end
 
