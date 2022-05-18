@@ -67,6 +67,44 @@ function dst = scale_rotate(src)
     rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)));
     rotation_angle
     dst = imrotate(src, 45 - rotation_angle);
+
+
+
+
+
+
+%[row, col] = find(dst);
+%min_row = min(row);
+%min_col = min(col);
+
+%max_row = max(row);
+%max_col = max(col);
+
+
+
+
+%rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)))
+%r = 45 - rotation_angle
+%rotated = imrotate(dst, -r);
+%figure, imshow(dst);
+%hold on;
+%plot(min_col, min_row, 'ro', 'MarkerSize', 3);
+%plot(max_col, max_row, 'ro', 'MarkerSize', 30);
+
+%figure, imshow(rotated);
+end
+
+function dst = split_plate(src)
+    S = regionprops(src,'boundingbox','filledimage', 'Orientation');
+    dst = cell(numel(S),1);
+    for n = 1:numel(S)
+        % get corresponding rectangular area
+        bb = floor(S(n).BoundingBox);
+        samp = src(bb(2):bb(2)+bb(4)-1,bb(1):bb(1)+bb(3)-1,:);
+        % store this image
+        dst{n} = samp;
+    end
+
 end
 
 
