@@ -37,9 +37,10 @@ end
 
 
 function dst = process_image(src)
-    dst = green_filter(src);
-    dst = filter_img(dst);
-    %dst = scale_rotate(dst);
+    bw = green_filter(src);
+    dst = clean_img(bw);
+    %rotated = scale_rotate(dst);
+    dst = split_plate(dst);
     
 end
 
@@ -49,7 +50,7 @@ function dst = green_filter(src_img)
     dst = (s > 0.36) & (0.33 < h & h < 0.51 ) & (0.21 < v & v < 0.59);
 end
 
-function dst = filter_img(src)
+function dst = clean_img(src)
     dst = bwpropfilt(src,'Area',6); 
 end
 
