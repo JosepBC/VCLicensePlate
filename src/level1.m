@@ -2,28 +2,37 @@ img1 = imread('../in_img/vivotek/afternoon/WTG38N.png');
 img2 = imread('../in_img/vivotek/afternoon/T67YVU.png');
 img3 = imread('../in_img/vivotek/afternoon/V01KHQ.png');
 
+
+teamplates = load_teamplates("../in_img/teamplates/");
+
+in_images = load_in_images("../in_img/vivotek/afternoon/");
+
 dst = process_image(img3);
-[row, col] = find(dst);
-min_row = min(row);
-min_col = min(col);
 
-max_row = max(row);
-max_col = max(col);
+function in_images = load_in_images(in_images_root_path)
+    names = ls(in_images_root_path+"*.png");
+
+    in_images = containers.Map();
+
+    for n = 1 : height(names)
+        elem = names(n, 1:6);
+        in_images(elem) = imread(in_images_root_path+elem+".png");
+    end
+end
 
 
+function teamplates = load_teamplates(teamplates_root_path)
+    teamplate_names = ls(teamplates_root_path+"*.png");
 
+    teamplates = containers.Map();
 
-rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)))
-dst = imrotate(dst, -45 + rotation_angle);
-figure, imshow(dst);
-hold on;
-plot(min_col, min_row, 'ro', 'MarkerSize', 3);
-plot(max_col, max_row, 'ro', 'MarkerSize', 30);
-%dst = process_image(img2);
-%figure, imshow(dst);
+    for n = 1 : height(teamplate_names)
+        elem = teamplate_names(n);
+        teamplates(elem) = imread(teamplates_root_path+elem+".png");
+    end
 
-%dst = process_image(img3);
-%figure, imshow(dst);
+end
+
 
 
 
