@@ -2,15 +2,39 @@ teamplates = load_teamplates("../in_img/teamplates/");
 
 in_images = load_in_images("../in_img/vivotek/afternoon/");
 
+results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
+show_images = false; % Set to true to see each image and it's binarization
+
+%Process images
 for key = keys(in_images)
-    figure, imshow(in_images(char(key)));
-
     plate = char(key);
 
-    dst = process_image(in_images(plate), plate, teamplates)
-
+    dst = process_image(in_images(plate), plate, teamplates, show_images);
+    results(dst + 1) = results(dst + 1) + 1;
 end
+
+%Print results
+n_plates = sum(results);
+n_ok = results(7);
+
+%For all characters recognized use different print...
+if n_ok == 1
+    disp(sprintf("En %i imatge (%.2f%%) s'han reconegut tots els caracters de la matricula", n_ok, (n_ok / n_plates) * 100));
+else
+    disp(sprintf("En %i imatges (%.2f%%) s'han reconegut tots els caracters de la matricula", n_ok, (n_ok / n_plates) * 100));
+end
+
+%Other matches
+for n = 6 : -1 : 1
+    n_ok = results(n);
+    if n_ok == 1
+        disp(sprintf("En %i imatge (%.2f%%) s'han reconegut %i caracters de la matricula", n_ok, (n_ok / n_plates) * 100, n - 1));
+    else
+        disp(sprintf("En %i imatges (%.2f%%) s'han reconegut %i caracters de la matricula", n_ok, (n_ok / n_plates) * 100, n - 1));
+    end
+end
+
 
 
 
@@ -38,10 +62,12 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-function dst = process_image(src, ground_truth, teamplates)
+function dst = process_image(src, ground_truth, teamplates, show_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
-    imshowpair(src, cleaned_img, 'montage');
+    if show_images
+        imshowpair(src, cleaned_img, 'montage');
+    end
     %rotated = scale_rotate(dst);
     plate_parts = split_plate(cleaned_img);
     dst = check_plate(plate_parts, ground_truth, teamplates);
