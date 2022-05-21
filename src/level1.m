@@ -1,6 +1,6 @@
 teamplates = load_teamplates("../in_img/teamplates/");
 
-in_images = load_in_images("../in_img/vivotek/morning/");
+in_images = load_in_images("../in_img/vivotek/afternoon/");
 
 results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
@@ -67,10 +67,13 @@ function n_elem_detected = process_image(src, ground_truth, teamplates, show_ima
     cleaned_img = clean_img(bw);
     %rotated = scale_rotate(dst);
     plate_parts = split_plate(cleaned_img);
+    %show_parts(plate_parts);
+    %store_teamplates(plate_parts, ground_truth);
     [n_elem_detected, detected_plate] = check_plate(plate_parts, ground_truth, teamplates);
     if show_images
         img = imshowpair(src, cleaned_img, 'montage');
-        saveas(img, detected_plate+".png", "png");
+        dt = datetime("now", "Format", 'yyyy-MM-dd_HH.mm.sss');
+        saveas(img, "../out_img/"+string(dt)+"_"+detected_plate+".png", "png");
     end
     %dst = cleaned_img;
 end
