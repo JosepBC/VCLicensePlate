@@ -1,17 +1,17 @@
 teamplates = load_teamplates("../in_img/teamplates/");
 
-in_images = load_in_images("../in_img/vivotek/afternoon/");
+in_images = load_in_images("../in_img/vivotek/morning/");
 
 results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
-show_images = false; % Set to true to see each image and it's binarization
+show_images = true; % Set to true to see each image and it's binarization
 
 %Process images
 for key = keys(in_images)
     plate = char(key);
 
-    dst = process_image(in_images(plate), plate, teamplates, show_images);
-    results(dst + 1) = results(dst + 1) + 1;
+    n_elem_detected = process_image(in_images(plate), plate, teamplates, show_images);
+    results(n_elem_detected + 1) = results(n_elem_detected + 1) + 1;
 end
 
 %Print results
@@ -62,15 +62,16 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-function dst = process_image(src, ground_truth, teamplates, show_images)
+function n_elem_detected = process_image(src, ground_truth, teamplates, show_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
-    if show_images
-        imshowpair(src, cleaned_img, 'montage');
-    end
     %rotated = scale_rotate(dst);
     plate_parts = split_plate(cleaned_img);
-    dst = check_plate(plate_parts, ground_truth, teamplates);
+    [n_elem_detected, detected_plate] = check_plate(plate_parts, ground_truth, teamplates);
+    if show_images
+        img = imshowpair(src, cleaned_img, 'montage');
+        saveas(img, detected_plate+".png", "png");
+    end
     %dst = cleaned_img;
 end
 
@@ -143,12 +144,14 @@ end
 %   - Teamplates
 %OUT:
 %   - Nelem sucesfully classified
-function dst = check_plate(plate_elements, ground_truth, teamplates)
-    dst = 0;
+function [n_elem_detected, detected_plate] = check_plate(plate_elements, ground_truth, teamplates)
+    n_elem_detected = 0;
+    detected_plate = "";
     for n = 1 : height(plate_elements)
         detected_element = correlate_element(plate_elements{n}, teamplates);
+        detected_plate = detected_plate + string(detected_element);
         if detected_element == ground_truth(n)
-            dst = dst + 1;
+            n_elem_detected = n_elem_detected + 1;
         end
     end
 
