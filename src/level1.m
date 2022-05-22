@@ -65,17 +65,17 @@ end
 function n_elem_detected = process_image(src, ground_truth, teamplates, show_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
-    %rotated = scale_rotate(dst);
+
     plate_parts = split_plate(cleaned_img);
-    %show_parts(plate_parts);
-    %store_teamplates(plate_parts, ground_truth);
+
     [n_elem_detected, detected_plate] = check_plate(plate_parts, ground_truth, teamplates);
+
     if show_images
         img = imshowpair(src, cleaned_img, 'montage');
         dt = datetime("now", "Format", 'yyyy-MM-dd_HH.mm.sss');
         saveas(img, "../out_img/"+string(dt)+"_"+detected_plate+".png", "png");
     end
-    %dst = cleaned_img;
+
 end
 
 function dst = green_filter(src_img)
@@ -86,46 +86,6 @@ end
 
 function dst = clean_img(src)
     dst = bwpropfilt(src,'Area',6); 
-end
-
-function dst = scale_rotate(src)
-    [row, col] = find(src);
-    min_row = min(row);
-    min_col = min(col);
-    
-    max_row = max(row);
-    max_col = max(col);
-
-    hold on;
-    plot(min_row, min_col, 'ro', 'MarkerSize', 3);
-    rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)));
-    rotation_angle
-    dst = imrotate(src, 45 - rotation_angle);
-
-
-
-
-
-
-%[row, col] = find(dst);
-%min_row = min(row);
-%min_col = min(col);
-
-%max_row = max(row);
-%max_col = max(col);
-
-
-
-
-%rotation_angle = rad2deg(atan((max_row - min_row) / (max_col - min_col)))
-%r = 45 - rotation_angle
-%rotated = imrotate(dst, -r);
-%figure, imshow(dst);
-%hold on;
-%plot(min_col, min_row, 'ro', 'MarkerSize', 3);
-%plot(max_col, max_row, 'ro', 'MarkerSize', 30);
-
-%figure, imshow(rotated);
 end
 
 function dst = split_plate(src)
@@ -185,20 +145,6 @@ function dst = correlate_element(plate_element, teamplates)
             dst = teamplate_name;
         end
     end
-    %t = imread('../in_img/teamplates/T.png');
-    %[rows, columns, numberOfColorChannels] = size(t);
-    %scondt = imresize(dst{1}, [rows, columns]);
-    %c = normxcorr2(t,scondt);
-    %surf(c)
-    %shading flat
-
-    %
-    %[ypeak,xpeak] = find(c==max(c(:)));
-    %yoffSet = ypeak-size(t,1);
-    %xoffSet = xpeak-size(t,2);
-    %imshow(scondt)
-    %drawrectangle(gca,'Position',[xoffSet,yoffSet,size(t,2),size(t,1)], ...
-    %    'FaceAlpha',0);
 end
 
 
