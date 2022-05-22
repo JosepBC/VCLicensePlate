@@ -81,7 +81,7 @@ end
 function dst = green_filter(src_img)
     hsv_img = rgb2hsv(src_img);
     [h,s,v] = imsplit(hsv_img);
-    dst = (s > 0.36) & (0.33 < h & h < 0.51 ) & (0.21 < v & v < 0.59);
+    dst = (s > 129/360) & (84/255 < h & h < 130/255) & (53/255 < v & v < 150/255);
 end
 
 function dst = clean_img(src)
