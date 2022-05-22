@@ -4,15 +4,12 @@ in_images = load_in_images("../in_img/tst/");
 
 results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
-
 %Process images
 for key = keys(in_images)
     plate = char(key);
     n_elem_detected = process_image(in_images(plate), plate, teamplates);
     results(n_elem_detected + 1) = results(n_elem_detected + 1) + 1;
-    %break;
 end
-
 
 
 %Print results
@@ -35,6 +32,8 @@ for n = 6 : -1 : 1
         disp(sprintf("En %i imatges (%.2f%%) s'han reconegut %i caracters de la matricula", n_ok, (n_ok / n_plates) * 100, n - 1));
     end
 end
+
+
 
 
 function in_images = load_in_images(in_images_root_path)
@@ -134,10 +133,6 @@ function [n_elem_detected, detected_plate] = check_plate(bw_img, ground_truth, t
             n_elem_detected = n_elem_detected + 1;
         end
     end
-
-    %detected_plate
-    %n_elem_detected
-    %ground_truth
 
 end
 
