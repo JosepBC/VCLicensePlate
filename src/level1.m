@@ -1,4 +1,4 @@
-teamplates = load_teamplates("../in_img/teamplates/level1");
+teamplates = load_teamplates("../in_img/teamplates/level1/");
 
 in_images = load_in_images("../in_img/vivotek/afternoon/");
 
