@@ -58,7 +58,7 @@ function [detected_plate, n_elem_detected] = process_image(src, ground_truth, te
 
     if store_images
         dt = datetime("now", "Format", 'yyyy-MM-dd_HH.mm.sss');
-        saveas(img, "../out_img/"+string(dt)+"_"+detected_plate+".png", "png");
+        saveas(img, "../out_img/level1/"+string(dt)+"_"+detected_plate+".png", "png");
     end
 
 end
