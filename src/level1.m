@@ -3,8 +3,8 @@ teamplates = load_teamplates("../in_img/teamplates/level1/");
 
 in_images = load_in_images("../in_img/vivotek/mid_day/");
 
-show_images = true; % Set to true to see each image and it's binarization
-store_images = true; % Set to true to store each image and it's binarization
+show_images = false; % Set to true to see each image and it's binarization
+store_images = false; % Set to true to store each image and it's binarization
 
 %Process images
 for key = keys(in_images)
@@ -64,7 +64,7 @@ end
 function dst = green_filter(src_img)
     hsv_img = rgb2hsv(src_img);
     [h,s,v] = imsplit(hsv_img);
-    dst = (s > 129/360) & (84/255 < h & h < 130/255) & (53/255 < v & v < 150/255);
+    dst = (118/360 < h & h < 183/360) & (91/255 < s & s < 255/255) & (53/255 < v & v < 150/255);
 end
 
 function dst = clean_img(src)
