@@ -1,15 +1,17 @@
 teamplates = load_teamplates("../in_img/teamplates/level2/");
+%teamplates = load_teamplates("../in_img/teamplates/font/bw/");
 
 in_images = load_in_images("../in_img/quercus/");
 
 show_images = false; % Set to true to see each image and it's binarization
+save_images = false; % Set to true to save each image and it's binarization
 
 results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
 %Process images
 for key = keys(in_images)
     plate = char(key);
-    n_elem_detected = process_image(in_images(plate), plate, teamplates, show_images);
+    n_elem_detected = process_image(in_images(plate), plate, teamplates, show_images, save_images);
     results(n_elem_detected + 1) = results(n_elem_detected + 1) + 1;
 end
 
@@ -65,14 +67,17 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-function n_elem_detected = process_image(src, ground_truth, teamplates, show_images)
+function n_elem_detected = process_image(src, ground_truth, teamplates, show_images, save_images)
     bw = green_filter(src);
     if show_images
         figure,imshow(bw);
     end
 
-    [n_elem_detected, detected_plate] = check_plate(bw, ground_truth, teamplates);
+    if save_images
+        imwrite(bw, "../in_img/teamplates/level2/imgs/"+ground_truth+".png")
+    end
 
+    [n_elem_detected, detected_plate] = check_plate(bw, ground_truth, teamplates);
 end
 
 function dst = green_filter(src_img)
