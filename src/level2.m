@@ -106,9 +106,6 @@ function roi = get_plate(src)
 
     best_ratio = objective_ratio * 2;
     bestbb = [0,0,0,0];
-    best_ratio = objective_ratio * 2;
-    bestbb = [0,0,0,0];
-
 
     imgray = rgb2gray(src);
     bw = imbinarize(imgray, 'adaptive');
