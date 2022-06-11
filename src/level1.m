@@ -1,3 +1,4 @@
+%teamplates = load_teamplates("../in_img/teamplates/font/bw/");
 teamplates = load_teamplates("../in_img/teamplates/level1/");
 
 in_images = load_in_images("../in_img/vivotek/mid_day/");
@@ -9,8 +10,8 @@ store_images = true; % Set to true to store each image and it's binarization
 for key = keys(in_images)
     plate = char(key);
 
-    detected_plate = process_image(in_images(plate), plate, teamplates, show_images, store_images);
-    disp(sprintf("Detectada matricula %s, ground truth: %s", detected_plate, plate));
+    [detected_plate, n_elem_detected] = process_image(in_images(plate), plate, teamplates, show_images, store_images);
+    disp(sprintf("Detectada matricula %s, ground truth: %s, elements detectats correctament: %i", detected_plate, plate, n_elem_detected));
 
 end
 
@@ -41,7 +42,7 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-function detected_plate = process_image(src, ground_truth, teamplates, show_images, store_images)
+function [detected_plate, n_elem_detected] = process_image(src, ground_truth, teamplates, show_images, store_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
 
