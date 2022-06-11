@@ -4,7 +4,7 @@ teamplates = load_teamplates("../in_img/teamplates/level2/");
 in_images = load_in_images("../in_img/quercus/");
 
 show_images = false; % Set to true to see each image and it's binarization
-save_images = false; % Set to true to save each image and it's binarization
+save_images = true; % Set to true to save each image and it's binarization
 
 results = zeros(1, 7); %Number of correct matches, first element 0 matches, second element 1 match ...
 
@@ -68,11 +68,13 @@ end
 
 
 function n_elem_detected = process_image(src, ground_truth, teamplates, show_images, save_images)
-    roi = get_roi(src);
-    roi = histeq(roi);
+    bw = get_plate(src);
+    %roi = get_roi(src);
+    %roi = histeq(roi);
 
-    bw = green_filter(roi);
-    bw = clean_img(bw);
+    %bw = green_filter(roi);
+    %bw = clean_img(bw);
+
 
     if show_images
         figure,imshow(bw);
@@ -89,29 +91,15 @@ function dst = green_filter(src_img)
     hsv_img = rgb2hsv(src_img);
     [h,s,v] = imsplit(hsv_img);
     dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 227/255);
+    %dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 200/255);
 end
 
-function roi = get_roi(src)
+function bw = get_plate(src)
     imgray = rgb2gray(src);
-    edges = edge(imgray, 'sobel');
 
-    %Below steps are to find location of number plate
-    Iprops=regionprops(edges, 'BoundingBox', 'Area', 'Image');
-
-    area = Iprops.Area;
-    count = numel(Iprops);
-
-    maxa = area;
-    boundingBox = Iprops.BoundingBox;
-
-    for i = 1:count
-       if maxa < Iprops(i).Area
-            maxa = Iprops(i).Area;
-            boundingBox = Iprops(i).BoundingBox;
-       end
-    end
-
-    roi = imcrop(src, boundingBox);
+    bw = imbinarize(imgray, 'adaptive');
+    %bw = imcrop(bw, boundingBox);
+    bw = ~bw;
 end
 
 function dst = clean_img(src)
