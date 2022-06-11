@@ -68,13 +68,18 @@ end
 
 
 function n_elem_detected = process_image(src, ground_truth, teamplates, show_images, save_images)
-    bw = green_filter(src);
+    roi = get_roi(src);
+    roi = histeq(roi);
+
+    bw = green_filter(roi);
+    bw = clean_img(bw);
+
     if show_images
         figure,imshow(bw);
     end
 
     if save_images
-        imwrite(bw, "../in_img/teamplates/level2/imgs/"+ground_truth+".png")
+        imwrite(bw, "../out_img/level2/"+ground_truth+".png")
     end
 
     [n_elem_detected, detected_plate] = check_plate(bw, ground_truth, teamplates);
@@ -83,7 +88,34 @@ end
 function dst = green_filter(src_img)
     hsv_img = rgb2hsv(src_img);
     [h,s,v] = imsplit(hsv_img);
-    dst = (172/360 < h & h < 250/360) & (80/255 < s & s < 255/255) & (60/255 < v & v < 255/255);
+    dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 227/255);
+end
+
+function roi = get_roi(src)
+    imgray = rgb2gray(src);
+    edges = edge(imgray, 'sobel');
+
+    %Below steps are to find location of number plate
+    Iprops=regionprops(edges, 'BoundingBox', 'Area', 'Image');
+
+    area = Iprops.Area;
+    count = numel(Iprops);
+
+    maxa = area;
+    boundingBox = Iprops.BoundingBox;
+
+    for i = 1:count
+       if maxa < Iprops(i).Area
+            maxa = Iprops(i).Area;
+            boundingBox = Iprops(i).BoundingBox;
+       end
+    end
+
+    roi = imcrop(src, boundingBox);
+end
+
+function dst = clean_img(src)
+    dst = bwpropfilt(src, 'Area', 6);
 end
 
 %IN:
@@ -169,6 +201,14 @@ end
 %   - Max value correlation value
 %   - X peak
 function [max_val, x_peak, y_peak] = correlate_element(bw_img, teamplate)
+    [rows_teamplate, cols_teamplate, numberOfColorChannels] = size(teamplate);
+    [rows_img, cols_img, numberOfColorChannels] = size(bw_img);
+
+    % If img size is < than teamplate size, resize
+    if rows_img < rows_teamplate || cols_img < cols_teamplate
+        bw_img = imresize(bw_img, [rows_teamplate, cols_teamplate]);
+    end
+
     c = normxcorr2(teamplate, bw_img);
     max_val = max(c(:));
     [y_peak, x_peak] = find(c==max_val);
