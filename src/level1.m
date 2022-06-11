@@ -37,6 +37,9 @@ function teamplates = load_teamplates(teamplates_root_path)
     for n = 1 : height(teamplate_names)
         elem = teamplate_names(n);
         teamplates(elem) = imread(teamplates_root_path+elem+".png");
+        if size(teamplates(elem), 3) == 3
+            teamplates(elem) = logical(rgb2gray(teamplates(elem)));
+        end
     end
 
 end
