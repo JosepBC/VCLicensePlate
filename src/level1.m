@@ -1,5 +1,4 @@
-%teamplates = load_teamplates("../in_img/teamplates/font/bw/");
-teamplates = load_teamplates("../in_img/teamplates/level1/");
+teamplates = load_teamplates("../in_img/teamplates/level2/");
 
 in_images = load_in_images("../in_img/vivotek/mid_day/");
 
