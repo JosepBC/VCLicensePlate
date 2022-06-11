@@ -1,9 +1,9 @@
 teamplates = load_teamplates("../in_img/teamplates/level1/");
 
-in_images = load_in_images("../in_img/vivotek/night/");
+in_images = load_in_images("../in_img/vivotek/mid_day/");
 
 show_images = true; % Set to true to see each image and it's binarization
-store_images = false; % Set to true to store each image and it's binarization
+store_images = true; % Set to true to store each image and it's binarization
 
 %Process images
 for key = keys(in_images)
