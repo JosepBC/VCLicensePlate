@@ -94,12 +94,62 @@ function dst = green_filter(src_img)
     %dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 200/255);
 end
 
-function bw = get_plate(src)
-    imgray = rgb2gray(src);
+function roi = get_plate(src)
+    objective_ratio = 2;
+    plate_area = 15931;
 
+    min_area = plate_area * (3/5);
+    max_area = plate_area * (7/5);
+
+    min_white_ratio = 0.60;
+    max_white_ratio = 0.90;
+
+    best_ratio = objective_ratio * 2;
+    bestbb = [0,0,0,0];
+    best_ratio = objective_ratio * 2;
+    bestbb = [0,0,0,0];
+
+
+    imgray = rgb2gray(src);
     bw = imbinarize(imgray, 'adaptive');
-    %bw = imcrop(bw, boundingBox);
-    bw = ~bw;
+    props = regionprops(bw, 'BoundingBox');
+
+    for n = 1:numel(props)
+        % get corresponding rectangular area
+        bb = floor(props(n).BoundingBox);
+        area = bb(3) * bb(4);
+
+        croped = imcrop(src, bb);
+        croped = histeq(croped);
+        hsv_img = rgb2hsv(croped);
+        [h,s,v] = imsplit(hsv_img);
+        v = v > 0.30;
+        %v = imbinarize(v, "adaptive");
+        white_pixels = sum(v(:));
+        white_ratio = white_pixels / area;
+
+        if bb(3) > bb(4) && area > min_area && area < max_area && white_ratio > min_white_ratio && white_ratio < max_white_ratio
+            ratio = bb(3)/bb(4);
+            diff = abs(objective_ratio - ratio);
+            if diff < best_ratio
+                best_ratio = diff;
+                bestbb = bb;
+                %bestv = v;
+            end
+        end
+    end
+
+    if sum(bestbb(:)) ~= 0
+        %cropeds = cropeds + 1;
+        bw = ~bw;
+        roi = imcrop(bw, bestbb);
+        %imwrite(bestv, "../out_img/box/v/"+elem+".png");
+    else
+        bw = ~bw;
+        roi = bw;
+    end
+
+    %imwrite(roi, "../out_img/box/roi/"+elem+".png");
 end
 
 function dst = clean_img(src)
