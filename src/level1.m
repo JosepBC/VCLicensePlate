@@ -3,12 +3,13 @@ teamplates = load_teamplates("../in_img/teamplates/level1/");
 in_images = load_in_images("../in_img/vivotek/night/");
 
 show_images = true; % Set to true to see each image and it's binarization
+store_images = false; % Set to true to store each image and it's binarization
 
 %Process images
 for key = keys(in_images)
     plate = char(key);
 
-    detected_plate = process_image(in_images(plate), plate, teamplates, show_images);
+    detected_plate = process_image(in_images(plate), plate, teamplates, show_images, store_images);
     disp(sprintf("Detectada matricula %s, ground truth: %s", detected_plate, plate));
 
 end
@@ -40,7 +41,7 @@ function teamplates = load_teamplates(teamplates_root_path)
 end
 
 
-function detected_plate = process_image(src, ground_truth, teamplates, show_images)
+function detected_plate = process_image(src, ground_truth, teamplates, show_images, store_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
 
@@ -50,6 +51,9 @@ function detected_plate = process_image(src, ground_truth, teamplates, show_imag
 
     if show_images
         img = imshowpair(src, cleaned_img, 'montage');
+    end
+
+    if store_images
         dt = datetime("now", "Format", 'yyyy-MM-dd_HH.mm.sss');
         saveas(img, "../out_img/"+string(dt)+"_"+detected_plate+".png", "png");
     end
