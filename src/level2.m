@@ -1,5 +1,4 @@
 teamplates = load_teamplates("../in_img/teamplates/level2/");
-%teamplates = load_teamplates("../in_img/teamplates/font/bw/");
 
 in_images = load_in_images("../in_img/quercus/");
 
@@ -69,12 +68,6 @@ end
 
 function n_elem_detected = process_image(src, ground_truth, teamplates, show_images, save_images)
     bw = get_plate(src);
-    %roi = get_roi(src);
-    %roi = histeq(roi);
-
-    %bw = green_filter(roi);
-    %bw = clean_img(bw);
-
 
     if show_images
         figure,imshow(bw);
@@ -85,13 +78,6 @@ function n_elem_detected = process_image(src, ground_truth, teamplates, show_ima
     end
 
     [n_elem_detected, detected_plate] = check_plate(bw, ground_truth, teamplates);
-end
-
-function dst = green_filter(src_img)
-    hsv_img = rgb2hsv(src_img);
-    [h,s,v] = imsplit(hsv_img);
-    dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 227/255);
-    %dst = (118/360 < h & h < 257/360) & (62/360 < s & s < 360/360) & (28/255 < v & v < 200/255);
 end
 
 function roi = get_plate(src)
@@ -121,7 +107,7 @@ function roi = get_plate(src)
         hsv_img = rgb2hsv(croped);
         [h,s,v] = imsplit(hsv_img);
         v = v > 0.30;
-        %v = imbinarize(v, "adaptive");
+
         white_pixels = sum(v(:));
         white_ratio = white_pixels / area;
 
@@ -131,26 +117,18 @@ function roi = get_plate(src)
             if diff < best_ratio
                 best_ratio = diff;
                 bestbb = bb;
-                %bestv = v;
             end
         end
     end
 
     if sum(bestbb(:)) ~= 0
-        %cropeds = cropeds + 1;
         bw = ~bw;
         roi = imcrop(bw, bestbb);
-        %imwrite(bestv, "../out_img/box/v/"+elem+".png");
     else
         bw = ~bw;
         roi = bw;
     end
 
-    %imwrite(roi, "../out_img/box/roi/"+elem+".png");
-end
-
-function dst = clean_img(src)
-    dst = bwpropfilt(src, 'Area', 6);
 end
 
 %IN:
