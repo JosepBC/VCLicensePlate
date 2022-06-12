@@ -1,6 +1,8 @@
 teamplates = load_teamplates("../in_img/teamplates/level1/");
 
-in_images = load_in_images("../in_img/vivotek/mid_day/");
+in_images = load_in_images("../in_img/vivotek/morning/");
+%in_images = load_in_images("../in_img/vivotek/mid_day/");
+%in_images = load_in_images("../in_img/vivotek/afternoon/");
 
 show_images = false; % Set to true to see each image and it's binarization
 store_images = false; % Set to true to store each image and it's binarization
@@ -47,7 +49,6 @@ end
 function [detected_plate, n_elem_detected] = process_image(src, ground_truth, teamplates, show_images, store_images)
     bw = green_filter(src);
     cleaned_img = clean_img(bw);
-
     plate_parts = split_plate(cleaned_img);
 
     [n_elem_detected, detected_plate] = check_plate(plate_parts, ground_truth, teamplates);
