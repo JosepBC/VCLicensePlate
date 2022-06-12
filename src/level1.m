@@ -80,9 +80,8 @@ function dst = split_plate(src)
     for n = 1:numel(S)
         % get corresponding rectangular area
         bb = floor(S(n).BoundingBox);
-        samp = src(bb(2):bb(2)+bb(4)-1,bb(1):bb(1)+bb(3)-1,:);
         % store this image
-        dst{n} = samp;
+        dst{n} = imcrop(src, bb);
     end
 
 end
@@ -116,7 +115,9 @@ function dst = correlate_element(plate_element, teamplates)
     dst = '';
 
     for key = keys(teamplates)
+        %Get teamplate name
         teamplate_name = char(key);
+        %Get teamplate img
         teamplate_img = teamplates(teamplate_name);
 
         %Test image must be same size as teamplate
