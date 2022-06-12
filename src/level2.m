@@ -9,6 +9,7 @@ results = zeros(1, 7); %Number of correct matches, first element 0 matches, seco
 
 %Process images
 for key = keys(in_images)
+    % Get ground truth, name of .png
     plate = char(key);
     n_elem_detected = process_image(in_images(plate), plate, teamplates, show_images, save_images);
     results(n_elem_detected + 1) = results(n_elem_detected + 1) + 1;
@@ -97,21 +98,30 @@ function roi = get_plate(src)
     bw = imbinarize(imgray, 'adaptive');
     props = regionprops(bw, 'BoundingBox');
 
+    %Find best bounding box
     for n = 1:numel(props)
-        % get corresponding rectangular area
+        %Get bb
         bb = floor(props(n).BoundingBox);
+        %Compute area
         area = bb(3) * bb(4);
 
+        %Crop original image with bounding box
         croped = imcrop(src, bb);
+
+        %Hist equalization
         croped = histeq(croped);
+
+        %Light filter
         hsv_img = rgb2hsv(croped);
         [h,s,v] = imsplit(hsv_img);
         v = v > 0.30;
 
+        %Count white
         white_pixels = sum(v(:));
         white_ratio = white_pixels / area;
 
         if bb(3) > bb(4) && area > min_area && area < max_area && white_ratio > min_white_ratio && white_ratio < max_white_ratio
+            %Aspect ratio
             ratio = bb(3)/bb(4);
             diff = abs(objective_ratio - ratio);
             if diff < best_ratio
@@ -121,6 +131,7 @@ function roi = get_plate(src)
         end
     end
 
+    %Bounding box found
     if sum(bestbb(:)) ~= 0
         bw = ~bw;
         roi = imcrop(bw, bestbb);
@@ -142,8 +153,8 @@ end
 function dst = orange_filter(src_img)
     hsv_img = rgb2hsv(src_img);
     [h,s,v] = imsplit(hsv_img);
-    low = (0/360 < h & h < 60/360) & (0/360 < s & s < 360/360) & (0/255 < v & v < 255/255);
-    high = (270/360 < h & h < 360/360) & (0/360 < s & s < 360/360) & (0/255 < v & v < 255/255);
+    low = (0/360 < h & h < 60/360) & (0/255 < s & s < 255/255) & (0/255 < v & v < 255/255);
+    high = (270/360 < h & h < 360/360) & (0/255 < s & s < 255/255) & (0/255 < v & v < 255/255);
     dst = low | high;
 end
 
@@ -171,18 +182,20 @@ function [n_elem_detected, detected_plate] = check_plate(bw_img, ground_truth, t
         part_img = part_teamplates_imgs{n};
 
         [max_val, x_peak, y_peak] = correlate_element(bw_img, part_img);
-        
+
         match_vals(teamplate_name) = max_val;
         match_x(teamplate_name) = x_peak;
     end
     
     correlations = get_6_max_correlations(match_vals);
-    
+
     %Get the x_value for the correlations
     letters = keys(correlations);
     max_xs = values(match_x, letters);
+
     x_values = zeros(1, 6);
 
+    %Get just one val for x_values
     for n = 1 : 6
         x_values(n) = max_xs{1,n}(1);
     end
@@ -206,6 +219,10 @@ function [n_elem_detected, detected_plate] = check_plate(bw_img, ground_truth, t
 
 end
 
+%IN:
+%   - Map with key detected element name, value correlation value
+%OUT:
+%   - Unordered map of the max 6 correlations, key name of element detected, 'T' and value best correlation value
 function dst = get_6_max_correlations(correlations)
     k = correlations.keys;
     v = correlations.values;
