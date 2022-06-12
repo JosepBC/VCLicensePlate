@@ -124,11 +124,27 @@ function roi = get_plate(src)
     if sum(bestbb(:)) ~= 0
         bw = ~bw;
         roi = imcrop(bw, bestbb);
+
+        % Filter orange stuff
+        color = imcrop(src, bestbb);
+        orange = orange_filter(color);
+        filtered = roi & ~orange;
+
+        % Fix size of image
+        roi = imresize(filtered, [90, 180]);
     else
         bw = ~bw;
         roi = bw;
     end
 
+end
+
+function dst = orange_filter(src_img)
+    hsv_img = rgb2hsv(src_img);
+    [h,s,v] = imsplit(hsv_img);
+    low = (0/360 < h & h < 60/360) & (0/360 < s & s < 360/360) & (0/255 < v & v < 255/255);
+    high = (270/360 < h & h < 360/360) & (0/360 < s & s < 360/360) & (0/255 < v & v < 255/255);
+    dst = low | high;
 end
 
 %IN:
